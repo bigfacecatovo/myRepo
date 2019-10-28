@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.jhc.dao.StudentMapper">
+    <select id="select" resultType="cn.jhc.entity.Student">
+        select * from student
+    </select>
+    
+    <delete id="delete" parameterType="cn.jhc.entity.Student">
+    	delete from student where id=#{id}  
+    </delete>
+  
+  	<insert id="insert" parameterType="cn.jhc.entity.Student">
+  		insert into student (id,name,sex,birth) values (#{id},#{name},#{sex},#{birth})
+	</insert>
+	
+	<update id="update">
+  		update student set id = #{id},name = #{name},sex = #{sex},birth = #{birth} where id = #{id}
+	</update>
+	
+	<insert id="insertMajor" useGeneratedKeys="true"  keyProperty="id">
+	  insert into student (name,sex,birth) values (#{name},#{sex},#{birth})
+	</insert>
+	
+	 <!-- 模糊查询 -->
+	 <select id="findByName" resultType="cn.jhc.entity.Student">
+        select * from student where name like #{name} and sex=#{sex}
+        
+    </select>
+    
+    <select id="find" resultType="cn.jhc.entity.Student">
+  		SELECT * FROM student
+  	<!-- 	<trim prefix="where" prefixOverrides="AND |OR ">
+ 			<if test="name != null">   
+    	 		AND name like #{name}    
+		    	AND name like CONCAT('%',#{name},'%')
+		  	</if>
+		  	<if test="sex != null"> 
+		    	AND sex like #{sex}  
+		  	</if>
+		  	<if test="birth != null">  
+		    	AND birth >= #{birth}   
+		  	</if>
+		</trim>  -->  
+		 
+  		<where>
+  			<if test="name != null">   
+    	 		<!-- AND name like #{name}    --> 
+		    	AND name like CONCAT('%',#{name},'%')
+		  	</if>
+		  	<if test="sex != null"> 
+		    	AND sex like #{sex}  
+		  	</if>
+		  	<if test="birth != null">  
+		    	AND birth >= #{birth}   
+		  	</if>
+  	   </where>
+	</select>
+	
+	<update id="updateOne">
+  		update student
+  			<trim prefix="SET" suffixOverrides=",">
+  				<if test="name != null">name=#{name},</if>
+		      	<if test="sex != null">sex=#{sex},</if>
+		      	<if test="birth != null">birth=#{birth},</if>
+			</trim>
+			
+		    <!-- <set>
+		      <if test="name != null">name=#{name},</if>
+		      <if test="sex != null">sex=#{sex},</if>
+		      <if test="birth != null">birth=#{birth},</if>
+		    </set> -->
+		    
+  		where id=#{id}
+	</update>
+	
+	 <select id="findByIds" resultType="cn.jhc.entity.Student" parameterType="list">
+        select * from student
+        <foreach item="item" index="index" collection="list" open="where" separator="or">
+        	id =#{item}
+  		</foreach>
+        
+    </select>
+    
+    <select id="findInIds" resultType="cn.jhc.entity.Student" parameterType="list">
+        select * from student where id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+        	#{item}
+  		</foreach>   
+    </select>
+	
+	<!-- Bind标签 -->
+	<select id="findBind" resultType="cn.jhc.entity.Student">
+  		<bind name="pattern" value="'%' + _parameter.getName() + '%'" />
+ 	 		SELECT * FROM student
+  			<where>
+  			<if test="name != null">   
+		    	AND name like #{pattern}
+		  	</if>
+		  	<if test="sex != null"> 
+		    	AND sex like #{sex}  
+		  	</if>
+		  	<if test="birth != null">  
+		    	AND birth >= #{birth}   
+		  	</if>
+  	   </where>
+	</select>
+	
+	<!-- choose, when, otherwise-->
+	<select id="findChoose"	resultType="cn.jhc.entity.Student">
+  		SELECT * FROM student WHERE 1 = 1
+  		<choose>
+    		<when test="name != null">
+      			AND name like #{name}
+    		</when>
+    		<when test="sex != null">
+      			AND sex like #{sex}
+    		</when>
+    		<otherwise>
+      			AND birth like #{birth}
+    		</otherwise>
+  		</choose>
+</select>
+</mapper>
